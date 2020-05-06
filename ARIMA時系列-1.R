@@ -1,3 +1,4 @@
+# 必要なライブラリのインポート
 library(forecast)
 library(ggfortify)
 library(ggplot2)
@@ -20,9 +21,8 @@ dd <- arima.sim(
   sd=sqrt(1)
 )
 
-plot(dd, main="蜥????驕守ｨ具ｼ哂RIMA(2,1,2)")
+plot(dd, main="ARIMA(2,1,2)")
 
-# 鬟幄｡梧ｩ????荵怜ｮ｢謨ｰ縺ｮ???繝ｼ繧ｿ
 data <- window(AirPassengers, end=c(1958, 12))
 
 # 季節周期成分を分離する
@@ -33,9 +33,8 @@ adf.test(AirPassengers)
 
 ggtsdisplay(data)
 
-plot(data, main="鬟幄｡梧ｩ????荵怜ｮ｢謨ｰ???繝ｼ繧ｿ")
 
-# AIC蝓ｺ貅悶〒繝｢???繝ｫ繧剃ｽ懊ｋ
+# AICによるモデル選択（遊び）
 model.1 <- auto.arima(
   d,
   ic="aic",
@@ -50,7 +49,7 @@ model.1 <- auto.arima(
 
 tsdiag(model.1)
 
-# 遏ｭ?悄莠域ｸｬ
+# 予測
 forecast(model.1, level = c(50,95), h = 10)
 
 plot(forecast(model.1, level = c(50,95), h = 10),
@@ -58,15 +57,15 @@ plot(forecast(model.1, level = c(50,95), h = 10),
      xlim=c(380, 410),
      lwd=2)
 
-# 髟ｷ譛滉ｺ域ｸｬ
-forecast(model.1, level = c(50,95), h = 100)?
+# 長期予測
+forecast(model.1, level = c(50,95), h = 100)
 plot(forecast(model.1, level = c(50,95), h = 100),
      shadecols=c("yellow", "orange"))
 
-# 蟷ｳ???蛟､繧貞ｼ輔￥
+# 平均値をグラフに引く
 abline(h=mean(d))
 
-# ???????驕守ｨ????繝｢???繝ｪ繝ｳ繧ｰ
+# AICによるモデル選択（遊び2）
 model.2 <- auto.arima(
   dd,
   ic="aic",
@@ -75,7 +74,7 @@ model.2 <- auto.arima(
   approximation=F
 )
 
-# 蟄｣遽螟牙虚???繝ｼ繧ｿ縺ｫ蟇ｾ縺吶ｋ繝｢???繝ｪ繝ｳ繧ｰ
+# AICによるモデル選択（本番）
 model.Air <- auto.arima(
   data,
   ic="aic",
@@ -89,19 +88,19 @@ model.Air <- auto.arima(
   start.Q=0,
 )
 
-# trace縺後♀縺九＠??????繝ｼ繧ｿ縺ｮAIC繧定ｪｿ縺ｹ???
+# AICを個別に確認
 arima(data,
       order=c(1,1,0),
       seasonal=list(order=c(1,1,1))
 )
 
-# ?IC縺御ｸ逡ｪ菴弱＞繝｢???繝ｫ縺ｮAIC
+# AICを個別に確認
 arima(data,
       order=c(1,1,0),
       seasonal=list(order=c(0,1,0))
 )
 
-# Python???繧ｭ繧ｹ繝郁ｼ峨▲縺ｦ???繧倶ｾ具ｼ亥柱???驕守ｨ九〒縺ｪ??????
+# ARIMA（3,0,2）でモデル構築
 ARIMA302<-arima(data,
       order=c(3,0,2),
       seasonal=list(order=c(0,0,0))
@@ -115,7 +114,7 @@ tsdiag(ARIMA302)
 
 plot(ARIMA302)
 
-# Python???繧ｭ繧ｹ繝郁ｼ峨▲縺ｦ???繧倶ｾ具ｼ亥柱????驕守ｨ九〒縺ゅｋ???
+# AICが最小となったARIMA（4,1,1）でモデル構築
 ARIMA411<-arima(data,
                 order=c(4,1,1),
                 seasonal=list(order=c(0,0,0))
@@ -144,25 +143,16 @@ Axis(
   side = 1
 )
 
-# ARIMA(4,1,1)縺ｧ縺ｮ莠域ｸｬ
+# ARIMA(4,1,1)の予測結果をプロット
 plot(
   forecast(ARIMA411, level = c(95), h = 100),
   shadecols=c("yellow"),
   fcol=2,
   flwd=2,
-  # xlim=c(1949, 1961),
-  #ylim=c(100, 600),
   type="o",
-  #xaxt =?"n",
   main="ARIMA(3,0,2)"
 )
-
 
 lines(AirPassengers, type="o", lwd=2)
 
 abline(h=mean(data))
-
-#Axis(
-  #at = seq(1949, 1961),
-  #side = 1
-#)
